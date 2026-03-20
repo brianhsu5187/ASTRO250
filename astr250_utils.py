@@ -3,47 +3,112 @@
 # %%
 
 # %%
-
+from functools import partial, wraps
 
 from specutils import Spectrum1D
 from matplotlib import pyplot as plt
+import matplotlib.image as img
 import numpy as np
 from astroML.datasets import fetch_sdss_filter, fetch_vega_spectrum
 
 
 # %%
+def test(test_func):
+    """Decorator to register a test function for a function"""
+    def wrapper(func):        
+        @wraps(func)
+        def wrapped_func(*args, **kwargs):
+            result = func(*args, **kwargs)  # Execute the function
+            return result  # Return original function result
+        
+        # Run the test immediately upon redefinition
+        test_func(func)
+
+        return wrapped_func
+    return wrapper
 
 
-def plot_gal_spectra():
+
+# %%
+def test_delta_y_function(delta_y):
+    """
+    Show a plot of y vs. t based on their delta_y function
+    """
+    fig, ax = plt.subplots()
+    
+    v0 = 10
+    t = np.linspace(0, 2, 100)
+    
+    ax.plot(t, delta_y(t, v0))
+    ax.set_ylabel(r"y(t)")
+    ax.set_xlabel("t")
+
+
+# %%
+def plot_labels_cmd(labels):
+    fig  = plt.figure(figsize=(6,4))
+    plt.ylabel('$u-r$', fontsize=12)
+    plt.xlabel('$r$ [mag]', fontsize=12)
+    plt.ylim([-4,4])
+    plt.xlim([8,20])
+
+    for k, v in labels.items():
+        if k == 'upper-left':
+            plt.text(0.2, 0.8, v, transform=fig.transFigure, fontsize=12)
+        elif k == 'upper-right':
+            plt.text(0.7, 0.8, v, transform=fig.transFigure, fontsize=12)
+        elif k == 'lower-left':
+            plt.text(0.2, 0.2, v, transform=fig.transFigure, fontsize=12)
+        elif k == 'lower-right':
+            plt.text(0.7, 0.2, v, transform=fig.transFigure, fontsize=12)
+    
+    return fig
+
+
+# %%
+def plot_gal_spectra(question=True):
     ## hide this into a function
-    spiral = Spectrum1D.read('/Users/brianhsu/Downloads/sed/ngc6221.fits')
-    # spiral.flux[spiral.flux.value<0] = np.nan
-    elliptical = Spectrum1D.read('/Users/brianhsu/Downloads/sed/ngc7196.fits')
-    # elliptical.flux[elliptical.flux.value<0] = np.nan
+    spiral = Spectrum1D.read('/Users/brianhsu/Downloads/sed/ngc1068.fits')
+    elliptical = Spectrum1D.read('/Users/brianhsu/Downloads/sed/ngc1399.fits')
 
     fig, ax = plt.subplots(2,1, figsize=(10,5), sharex=True)
     plt.subplots_adjust(hspace=0.2)
 
     ax[0].plot(elliptical.spectral_axis, elliptical.flux.value, color='k', lw=1)
     ax[1].plot(spiral.spectral_axis, spiral.flux.value, color='k', lw=1)
+    
+#     ax[0].plot(elliptical.spectral_axis, elliptical.flux.value, color='k', lw=1)
+#     ax[1].plot(spiral.spectral_axis, spiral.flux.value, color='k', lw=1)
 
     for a in ax:
     #     a.set_yscale('log')
         a.set_ylabel('Flux Density', fontsize=12)
         a.minorticks_on()
         a.set_xlim(3000,10000)
+#         a.set_ylim(1e-15,1e-13)
+#         a.set_yscale('log')
     ax[1].set_xlabel('Wavelength (${\\rm \\AA}$)', fontsize=12)
-    ax[0].set_title('No Star Formation')
-    ax[1].set_title('Active Star Formation')
+    ax[0].set_title('Galaxy 1')
+    ax[1].set_title('Galaxy 2')
     plt.show()
+    
+    if question:
+        q = 'Question: Examine the amount of light being given of at each wavelength for both galaxies. In which galaxy’s spectrum (1 or 2) do you see a greater contribution from blue light, indicating bright O stars and the presence of active star formation?'
+        print(q)
+        
+        answer = input()
+        if answer.strip().lower() in ['galaxy 2', '2', 'galaxy2']:
+            print("✅ Correct!")
+        else:
+            print("❌ Incorrect.")
 
 
 # %%
 def plot_gal_spectra_w_filters():
     ## hide this into a function
-    spiral = Spectrum1D.read('/Users/brianhsu/Downloads/sed/ngc6221.fits')
+    spiral = Spectrum1D.read('/Users/brianhsu/Downloads/sed/ngc1068.fits')
     spiral.flux[spiral.flux.value<0] = np.nan
-    elliptical = Spectrum1D.read('/Users/brianhsu/Downloads/sed/ngc7196.fits')
+    elliptical = Spectrum1D.read('/Users/brianhsu/Downloads/sed/ngc1399.fits')
     elliptical.flux[elliptical.flux.value<0] = np.nan
 
     fig, ax = plt.subplots(2,1, figsize=(10,5), sharex=True)
@@ -68,6 +133,232 @@ def plot_gal_spectra_w_filters():
         a.minorticks_on()
         a.set_yticklabels([])
     ax[1].set_xlabel('Wavelength (${\\rm \\AA}$)', fontsize=12)
-    ax[0].set_title('No Star Formation',fontsize=16)
-    ax[1].set_title('Active Star Formation',fontsize=16)
+    ax[0].set_title('Galaxy 1',fontsize=16)
+    ax[1].set_title('Galaxy 2',fontsize=16)
     plt.show()
+
+
+# %%
+def galaxy_images():
+    fig, ax = plt.subplots(1,2,figsize=(14,7))
+    plt.subplots_adjust(wspace=0.05)
+    im1 = img.imread('./NGC1399.jpg')
+    im2 = img.imread('./NGC1068.png')
+
+    # show image
+    ax[0].imshow(im1, origin='lower')
+    ax[1].imshow(im2, origin='lower')
+    for a in ax:
+        a.set_xticks([])
+        a.set_yticks([])
+        a.spines['top'].set_visible(False)
+        a.spines['right'].set_visible(False)
+        a.spines['bottom'].set_visible(False)
+        a.spines['left'].set_visible(False)
+    ax[0].set_title('Elliptical', fontsize=22)
+    ax[1].set_title('Spiral', fontsize=22)
+    plt.show()
+
+
+# %%
+def fill_in_the_blanks(blanks_data, full_statement):
+    """
+    Presents a series of fill-in-the-blank questions and checks the answers.
+
+    Args:
+        blanks_data: A list of dictionaries, where each dictionary has 
+                     'question' (the text with a placeholder like '______') 
+                     and 'answer' (the correct word for the blank).
+    Returns:
+        None (prints the final score).
+    """
+    score = 0
+    total_questions = len(blanks_data)
+    
+    for index, item in enumerate(blanks_data):
+        question = item['question']
+        correct_answer = item['answer']
+
+        # Display the question and get user input
+        user_input = input(f"Question {index + 1}: {question} Your answer: ")
+        
+        # Check if the user's input is correct (case-insensitive)
+        if user_input.strip().lower() == correct_answer.lower():
+            print("✅ Correct!")
+            score += 1
+        else:
+            print(f"❌ Incorrect. The correct answer was '{correct_answer}'.")
+        print("-" * 20) # Separator for readability
+
+    # Print the final score
+#         print(f"Nice work! You got {score} out of {total_questions} questions correct.")
+    print(full_statement)
+
+
+# %%
+def fill_in_the_blanks_1():
+    # The input() function always returns a string, so answers should be strings
+    quiz_questions = [
+        {
+            'question': "For Galaxy 1, the apparent magnitude in the u filter is approximately ______ ('greater than', 'the same as', or 'less than') the apparent magnitude for the r filter.",
+            'answer': "less than"
+        },
+        {
+            'question': "For Galaxy 2, the apparent magnitude in the u filter is approximately ______ ('greater than', 'the same as', or 'less than') the apparent magnitude for the r filter.",
+            'answer': "the"
+        }
+    ]
+    
+    full_statement = '''Galaxy 1 has a higher u-r color index value.\n
+Galaxy 2 has a lower u-r color index value.'''
+
+    fill_in_the_blanks(quiz_questions, full_statement)
+
+
+# %%
+def fill_in_the_blanks_2():
+    # The input() function always returns a string, so answers should be strings
+    quiz_questions = [
+        {
+            'question': "Galaxy ______ (1/2) has a lower u-r color index value,",
+            'answer': "2"
+        },
+        {
+            'question': "which means that this galaxy would appear ______ (bluer/redder).",
+            'answer': "bluer"
+        },
+        {
+            'question': "This implies it has many O-type stars and that it ______ (is/isn't) experiencing star formation.",
+            'answer': "is"
+        }
+    ]
+    
+    full_statement = "Galaxy 2 has a lower u-r color index value, which means that this galaxy would appear bluer. This implies that it has many O-type stars and that it is experiencing star formation"
+
+    fill_in_the_blanks(quiz_questions, full_statement)
+
+
+# %%
+from astropy.cosmology import LambdaCDM
+from dl import authClient as ac, queryClient as qc
+from getpass import getpass
+
+from matplotlib.gridspec import GridSpec
+from matplotlib.colors import LogNorm
+import matplotlib as mpl
+import random
+from scipy.ndimage import gaussian_filter
+
+cosmo = LambdaCDM(H0=70, Om0=0.3, Ode0=0.7)# Login using your user name and password, validate the returned
+
+ac.whoAmI()
+
+
+def query_sdss(min_color_index, max_color_index):
+    min_flux_ratio = 10**(min_color_index/-2.5)
+    max_flux_ratio = 10**(max_color_index/-2.5)
+
+    sql_ug = f"""
+    SELECT TOP 1000000 S.spectroflux_g, S.spectroflux_r, S.spectroflux_u, S.class, S.spectroskyflux_g, 
+    S.spectroskyflux_r, S.spectroskyflux_u, S.specobjid, S.snmedian_u, S.snmedian_g, S.snmedian_r, S.z,
+    P.sfr, P.logmass
+    FROM sdss_dr12.specobj as S 
+    INNER JOIN sdss_dr12.stellarmass_portsmouth as P ON S.specobjid = P.specobjid
+    WHERE S.z<1.0 AND S.class='GALAXY' AND S.snmedian_u > 10.0 AND S.snmedian_g > 10.0 
+    AND S.snmedian_r > 10.0 
+    AND S.spectroflux_u/spectroflux_r < {min_flux_ratio} AND S.spectroflux_u/spectroflux_r > {max_flux_ratio}
+    """
+
+    data = qc.query(sql=sql_ug, fmt = 'table', limit=100000)
+    g = flux_to_mag(data['spectroflux_g'])
+    r = flux_to_mag(data['spectroflux_r'])
+    u = flux_to_mag(data['spectroflux_u'])
+    
+    g_r = g - r
+    u_r = u - r
+    u_g = u - g
+    return u_r, r
+
+def flux_to_mag(flux):
+    return 22.5 - 2.5 * np.log10(flux)
+
+
+# %%
+def plot_hist(color):
+    fig = plt.figure(figsize=(6,5))
+    
+    plt.hist(color, bins=100, color='gray')
+    plt.tick_params(labelsize=12)
+    plt.xlabel('$u-r$', fontsize=14)
+    plt.ylabel('Number of Galaxies', fontsize=14)
+    
+    plt.show()
+
+
+# %%
+def plot_sfr():
+    fig, ax = plt.subplots(1,3, figsize=(15,5))
+
+    s1 = np.concatenate((np.random.normal(1, 0.9, 20000), np.random.normal(3., 0.12, 10000)))
+    ax[0].hist(s1, bins=100, range=(-1,3.5), color='gray')
+
+    s2 = np.concatenate((np.random.normal(1.5, 0.9, 20000), np.random.normal(-0.5, 0.12, 10000)))
+    ax[1].hist(s2, bins=100, range=(-1,3.5), color='gray')
+
+    s3 = np.random.normal(1.3, 0.7, 100000)
+    ax[2].hist(s3, bins=100, range=(-1,3.5), color='gray');
+
+    for a in ax:
+        a.tick_params(labelsize=12, direction='in')
+        a.set_xticks([-1,3.5], ['Low','High'])
+        a.set_yticklabels([])
+        a.set_xlabel('Star-Formation Rate', fontsize=14)
+        a.set_ylabel('Number of Galaxies', fontsize=14)
+    ax[0].set_title('A', fontsize=16)
+    ax[1].set_title('B', fontsize=16)
+    ax[2].set_title('C', fontsize=16)
+    plt.show()
+
+
+# %%
+def show_cluster_data(ax=None, *args, **kwargs):
+    fig, ax = plt.subplots(1,1,figsize=(7,6))
+
+    plt.hexbin(r,color, bins=10, cmap='gray_r', edgecolors='None', linewidths=None,    
+           mincnt=1,          # also helps avoid empty-bin outlines)
+           antialiased=False)  # prevents faint rendering seams)
+    plt.gca().invert_xaxis()
+    plt.ylabel('$u-r$', fontsize=14)
+    plt.xlabel('$r$ (mag)', fontsize=14)
+
+    return ax
+
+
+# %%
+def show_cmd_data(r, color, ax=None, *args, **kwargs):
+    fig, ax = plt.subplots(1,1,figsize=(6,5))
+
+    ax.hexbin(r,color, bins=100, cmap='gray_r', edgecolors='None', linewidths=None,    
+           mincnt=1,          # also helps avoid empty-bin outlines)
+           antialiased=False)  # prevents faint rendering seams)
+    ax.invert_xaxis()
+    ax.set_ylabel('$u-r$', fontsize=14)
+    ax.set_xlabel('$r$ (mag)', fontsize=14)
+    ax.tick_params(labelsize=12, direction='in')
+
+    return ax
+
+
+# %%
+def write_label(x, y, label, ax, color='red', **kwargs):
+
+    if x in {"CHANGE ME", "X"} or y in {"CHANGE ME", "Y"}:
+        return #they still need to replace them
+
+    if isinstance(x, str):
+        x = float(x)
+
+    if isinstance(y, str):
+        y = float(y)
+
+    ax.text(x, y, label, color=color, fontsize=18, horizontalalignment='center', verticalalignment='center')

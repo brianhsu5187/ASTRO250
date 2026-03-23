@@ -9,7 +9,7 @@ from specutils import Spectrum1D
 from matplotlib import pyplot as plt
 import matplotlib.image as img
 import numpy as np
-from astroML.datasets import fetch_sdss_filter, fetch_vega_spectrum
+from astroquery.sdss import SDSS
 
 
 # %%
@@ -101,41 +101,6 @@ def plot_gal_spectra(question=True):
             print("✅ Correct!")
         else:
             print("❌ Incorrect.")
-
-
-# %%
-def plot_gal_spectra_w_filters():
-    ## hide this into a function
-    spiral = Spectrum1D.read('/Users/brianhsu/Downloads/sed/ngc1068.fits')
-    spiral.flux[spiral.flux.value<0] = np.nan
-    elliptical = Spectrum1D.read('/Users/brianhsu/Downloads/sed/ngc1399.fits')
-    elliptical.flux[elliptical.flux.value<0] = np.nan
-
-    fig, ax = plt.subplots(2,1, figsize=(10,5), sharex=True)
-    plt.subplots_adjust(hspace=0.3)
-
-    ax[0].plot(elliptical.spectral_axis, elliptical.flux.value/np.nanmax(elliptical.flux.value), color='k', lw=1)
-    ax[1].plot(spiral.spectral_axis, spiral.flux.value/np.nanmax(spiral.flux.value), color='k', lw=1)
-
-    text_kwargs = dict(ha='center', va='center', alpha=1, fontsize=18)
-
-    for f, c, loc in zip('ugriz', 'bgrmk', [3551, 4686, 6166, 7480, 8932]):
-        data = fetch_sdss_filter(f)
-        for a in ax:
-            a.fill(data[0], data[1]/data[1].max(), ec=c, fc=c, alpha=0.2)
-        ax[0].text(loc, 0.1, f, color=c, **text_kwargs)
-        ax[1].text(loc, 0.6, f, color=c, **text_kwargs)
-
-    for a in ax:
-        a.set_xlim(3000, 10000)
-    #     a.set_yscale('log')
-        a.set_ylabel('Flux Density', fontsize=12)
-        a.minorticks_on()
-        a.set_yticklabels([])
-    ax[1].set_xlabel('Wavelength (${\\rm \\AA}$)', fontsize=12)
-    ax[0].set_title('Galaxy 1',fontsize=16)
-    ax[1].set_title('Galaxy 2',fontsize=16)
-    plt.show()
 
 
 # %%
@@ -239,48 +204,23 @@ def fill_in_the_blanks_2():
 
 
 # %%
-from astropy.cosmology import LambdaCDM
-from dl import authClient as ac, queryClient as qc
-from getpass import getpass
-
-from matplotlib.gridspec import GridSpec
-from matplotlib.colors import LogNorm
-import matplotlib as mpl
-import random
-from scipy.ndimage import gaussian_filter
-
-cosmo = LambdaCDM(H0=70, Om0=0.3, Ode0=0.7)# Login using your user name and password, validate the returned
-
-ac.whoAmI()
-
-
 def query_sdss(min_color_index, max_color_index):
-    min_flux_ratio = 10**(min_color_index/-2.5)
-    max_flux_ratio = 10**(max_color_index/-2.5)
+    query = f"""
+            SELECT TOP 100000 p.u, p.r, s.z, s.class, s.snmedian_u, s.snmedian_r
+            FROM PhotoObj AS p
+            JOIN SpecObj AS s ON s.bestObjID = p.objID
+            AND s.class='GALAXY'
+            AND s.snmedian_u > 5.0 AND s.snmedian_r > 5.0 
+            AND s.z < 0.05
+            AND (p.u-p.r) > {min_color_index} AND (p.u-p.r) < {max_color_index}
+            """
 
-    sql_ug = f"""
-    SELECT TOP 1000000 S.spectroflux_g, S.spectroflux_r, S.spectroflux_u, S.class, S.spectroskyflux_g, 
-    S.spectroskyflux_r, S.spectroskyflux_u, S.specobjid, S.snmedian_u, S.snmedian_g, S.snmedian_r, S.z,
-    P.sfr, P.logmass
-    FROM sdss_dr12.specobj as S 
-    INNER JOIN sdss_dr12.stellarmass_portsmouth as P ON S.specobjid = P.specobjid
-    WHERE S.z<1.0 AND S.class='GALAXY' AND S.snmedian_u > 10.0 AND S.snmedian_g > 10.0 
-    AND S.snmedian_r > 10.0 
-    AND S.spectroflux_u/spectroflux_r < {min_flux_ratio} AND S.spectroflux_u/spectroflux_r > {max_flux_ratio}
-    """
-
-    data = qc.query(sql=sql_ug, fmt = 'table', limit=100000)
-    g = flux_to_mag(data['spectroflux_g'])
-    r = flux_to_mag(data['spectroflux_r'])
-    u = flux_to_mag(data['spectroflux_u'])
+    results = SDSS.query_sql(query)
+    r = results['r']
+    u = results['u']
     
-    g_r = g - r
-    u_r = u - r
-    u_g = u - g
+    u_r = u-r
     return u_r, r
-
-def flux_to_mag(flux):
-    return 22.5 - 2.5 * np.log10(flux)
 
 
 # %%

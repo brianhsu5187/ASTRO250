@@ -4,8 +4,6 @@
 
 # %%
 from functools import partial, wraps
-
-# from specutils import Spectrum1D
 from matplotlib import pyplot as plt
 import matplotlib.image as img
 import numpy as np

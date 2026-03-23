@@ -67,30 +67,30 @@ def plot_labels_cmd(labels):
 
 # %%
 def plot_gal_spectra(question=True):
-    ## hide this into a function
-    spiral = Spectrum1D.read('/Users/brianhsu/Downloads/sed/ngc1068.fits')
-    elliptical = Spectrum1D.read('/Users/brianhsu/Downloads/sed/ngc1399.fits')
+#     ## hide this into a function
+#     spiral = Spectrum1D.read('/Users/brianhsu/Downloads/sed/ngc1068.fits')
+#     elliptical = Spectrum1D.read('/Users/brianhsu/Downloads/sed/ngc1399.fits')
 
-    fig, ax = plt.subplots(2,1, figsize=(10,5), sharex=True)
-    plt.subplots_adjust(hspace=0.2)
+#     fig, ax = plt.subplots(2,1, figsize=(10,5), sharex=True)
+#     plt.subplots_adjust(hspace=0.2)
 
-    ax[0].plot(elliptical.spectral_axis, elliptical.flux.value, color='k', lw=1)
-    ax[1].plot(spiral.spectral_axis, spiral.flux.value, color='k', lw=1)
-    
 #     ax[0].plot(elliptical.spectral_axis, elliptical.flux.value, color='k', lw=1)
 #     ax[1].plot(spiral.spectral_axis, spiral.flux.value, color='k', lw=1)
+    
+# #     ax[0].plot(elliptical.spectral_axis, elliptical.flux.value, color='k', lw=1)
+# #     ax[1].plot(spiral.spectral_axis, spiral.flux.value, color='k', lw=1)
 
-    for a in ax:
-    #     a.set_yscale('log')
-        a.set_ylabel('Flux Density', fontsize=12)
-        a.minorticks_on()
-        a.set_xlim(3000,10000)
-#         a.set_ylim(1e-15,1e-13)
-#         a.set_yscale('log')
-    ax[1].set_xlabel('Wavelength (${\\rm \\AA}$)', fontsize=12)
-    ax[0].set_title('Galaxy 1')
-    ax[1].set_title('Galaxy 2')
-    plt.show()
+#     for a in ax:
+#     #     a.set_yscale('log')
+#         a.set_ylabel('Flux Density', fontsize=12)
+#         a.minorticks_on()
+#         a.set_xlim(3000,10000)
+# #         a.set_ylim(1e-15,1e-13)
+# #         a.set_yscale('log')
+#     ax[1].set_xlabel('Wavelength (${\\rm \\AA}$)', fontsize=12)
+#     ax[0].set_title('Galaxy 1')
+#     ax[1].set_title('Galaxy 2')
+#     plt.show()
     
     if question:
         q = 'Question: Examine the amount of light being given of at each wavelength for both galaxies. In which galaxy’s spectrum (1 or 2) do you see a greater contribution from blue light, indicating bright O stars and the presence of active star formation?'

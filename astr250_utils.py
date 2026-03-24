@@ -133,27 +133,7 @@ def fill_in_the_blanks(blanks_data, full_statement):
 
 
 # %%
-def fill_in_the_blanks_1():
-    # The input() function always returns a string, so answers should be strings
-    quiz_questions = [
-        {
-            'question': "For Galaxy 1, the apparent magnitude in the u filter is approximately ______ ('greater than', 'the same as', or 'less than') the apparent magnitude for the r filter.",
-            'answer': "less than"
-        },
-        {
-            'question': "For Galaxy 2, the apparent magnitude in the u filter is approximately ______ ('greater than', 'the same as', or 'less than') the apparent magnitude for the r filter.",
-            'answer': "the"
-        }
-    ]
-    
-    full_statement = '''Galaxy 1 has a higher u-r color index value.\n
-Galaxy 2 has a lower u-r color index value.'''
-
-    fill_in_the_blanks(quiz_questions, full_statement)
-
-
-# %%
-def fill_in_the_blanks_2():
+def knowledge_check():
     # The input() function always returns a string, so answers should be strings
     quiz_questions = [
         {

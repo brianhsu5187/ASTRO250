@@ -156,6 +156,20 @@ def knowledge_check():
 
 
 # %%
+def sfr_histogram():
+    quiz_questions = [
+        {
+            'question': "Which of these star formation rate histograms (A, B or C) is most likely given the Sloan data set color index histogram? ______.",
+            'answer': "B"
+        }
+    ]
+    
+    full_statement = "Which of these star formation rate histograms (A, B or C) is most likely given the Sloan data set color index histogram? B"
+
+    fill_in_the_blanks(quiz_questions, full_statement)
+
+
+# %%
 def match_image_and_spectra():
     # The input() function always returns a string, so answers should be strings
     quiz_questions = [
@@ -166,10 +180,15 @@ def match_image_and_spectra():
         {
             'question': "Elliptical galaxy and Galaxy ______ (1 or 2).",
             'answer': "1"
+        },
+        
+        {
+            'question': "Which type of galaxy is more likely to have active star formation? ______ (spiral or elliptical)",
+            'answer': "spiral"
         }
     ]
     
-    full_statement = "Spiral galaxy and Galaxy 2.\nElliptical galaxy and Galaxy 1."
+    full_statement = "Spiral galaxy and Galaxy 2.\nElliptical galaxy and Galaxy 1.\nWhich type of galaxy is more likely to have active star formation? Spiral"
 
     fill_in_the_blanks(quiz_questions, full_statement)
 

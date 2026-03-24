@@ -77,8 +77,8 @@ def gal_spectra_fill_in_the_blanks():
 
 # %%
 def galaxy_images():
-    fig, ax = plt.subplots(1,2,figsize=(14,7))
-    plt.subplots_adjust(wspace=0.05)
+    fig, ax = plt.subplots(2,1,figsize=(7,15))
+    plt.subplots_adjust(hspace=0.05)
     im1 = img.imread('./NGC1399.jpg')
     im2 = img.imread('./NGC1068.png')
 
@@ -151,6 +151,25 @@ def knowledge_check():
     ]
     
     full_statement = "Galaxy 2 has a lower u-r color index value, which means that this galaxy would appear bluer. This implies that it has many O-type stars and that it is experiencing star formation"
+
+    fill_in_the_blanks(quiz_questions, full_statement)
+
+
+# %%
+def match_image_and_spectra():
+    # The input() function always returns a string, so answers should be strings
+    quiz_questions = [
+        {
+            'question': "Spiral galaxy and Galaxy ______ (1 or 2).",
+            'answer': "2"
+        },
+        {
+            'question': "Elliptical galaxy and Galaxy ______ (1 or 2).",
+            'answer': "1"
+        }
+    ]
+    
+    full_statement = "Spiral galaxy and Galaxy 2.\nElliptical galaxy and Galaxy 1."
 
     fill_in_the_blanks(quiz_questions, full_statement)
 
